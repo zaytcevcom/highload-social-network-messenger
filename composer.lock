@@ -7737,16 +7737,16 @@
         },
         {
             "name": "zaymedia/shared",
-            "version": "1.0.24",
+            "version": "1.0.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zaymedia/shared.git",
-                "reference": "abf50ba3c42007830074cd289c1eeddd7bf1805a"
+                "reference": "d75985a8c7a43ecf02ad1ab96c291fde3371f3e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zaymedia/shared/zipball/abf50ba3c42007830074cd289c1eeddd7bf1805a",
-                "reference": "abf50ba3c42007830074cd289c1eeddd7bf1805a",
+                "url": "https://api.github.com/repos/zaymedia/shared/zipball/d75985a8c7a43ecf02ad1ab96c291fde3371f3e2",
+                "reference": "d75985a8c7a43ecf02ad1ab96c291fde3371f3e2",
                 "shasum": ""
             },
             "require": {
@@ -7821,9 +7821,9 @@
             "description": "Shared",
             "support": {
                 "issues": "https://github.com/zaymedia/shared/issues",
-                "source": "https://github.com/zaymedia/shared/tree/1.0.24"
+                "source": "https://github.com/zaymedia/shared/tree/1.0.26"
             },
-            "time": "2023-05-28T10:22:38+00:00"
+            "time": "2023-05-28T14:41:55+00:00"
         },
         {
             "name": "zircote/swagger-php",

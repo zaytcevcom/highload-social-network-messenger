@@ -76,6 +76,18 @@ app-composer-outdated: #get not updated
 app-wait-mysql:
 	docker-compose run --rm php-cli wait-for-it mysql:3306 -t 30
 
+app-wait-proxysql:
+	docker-compose run --rm php-cli wait-for-it proxysql:6033 -t 30
+
+app-wait-db-node-0:
+	docker-compose run --rm php-cli wait-for-it db-node-0:3306 -t 30
+
+app-wait-db-node-1:
+	docker-compose run --rm php-cli wait-for-it db-node-1:3306 -t 30
+
+app-wait-db-node-2:
+	docker-compose run --rm php-cli wait-for-it db-node-2:3306 -t 30
+
 #DB
 app-db-validate-schema:
 	docker-compose run --rm php-cli composer app orm:validate-schema
