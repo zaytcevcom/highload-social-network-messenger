@@ -1,0 +1,93 @@
+{
+    "name": "zaytcevcom/highload-social-network-messenger",
+    "description": "Highload project on the example of a social network",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Konstantin Zaytcev"
+        }
+    ],
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-curl": "*",
+        "ext-mbstring": "^8.1",
+        "ext-openssl": "*",
+        "ext-redis": "*",
+        "centrifugal/phpcent": "^5.0",
+        "doctrine/migrations": "^3.5",
+        "doctrine/orm": "^2.12",
+        "fakerphp/faker": "^1.21",
+        "laminas/laminas-config-aggregator": "^1.2",
+        "league/oauth2-server": "^8.3",
+        "monolog/monolog": "^3.0",
+        "php-amqplib/php-amqplib": "^3.0",
+        "php-di/php-di": "^7.0",
+        "psr/http-factory-implementation": "*",
+        "ramsey/uuid": "^4.3",
+        "sentry/sdk": "^3.2",
+        "slim/psr7": "^1.5",
+        "slim/slim": "^4.10",
+        "symfony/cache": "^6.0",
+        "symfony/config": "^6.1",
+        "symfony/console": "^6.0",
+        "symfony/mailer": "^6.1",
+        "symfony/property-access": "^6.2",
+        "symfony/property-info": "^6.1",
+        "symfony/serializer": "^6.2",
+        "symfony/translation": "^6.1",
+        "symfony/validator": "^6.1",
+        "twig/twig": "^3.4",
+        "vlucas/phpdotenv": "^5.4",
+        "zaymedia/shared": "^1.0",
+        "zircote/swagger-php": "^4.4"
+    },
+    "require-dev": {
+        "dg/bypass-finals": "^1.3",
+        "dms/phpunit-arraysubset-asserts": "^0.4.0",
+        "doctrine/data-fixtures": "^1.5",
+        "friendsofphp/php-cs-fixer": "^3.8",
+        "guzzlehttp/guzzle": "^7.2",
+        "lctrs/psalm-psr-container-plugin": "^1.7",
+        "overtrue/phplint": "^9.0",
+        "phpdocumentor/reflection": "^5.3",
+        "phpunit/phpunit": "^9.6",
+        "psalm/plugin-phpunit": "^0.18.3",
+        "roave/security-advisories": "dev-master",
+        "vimeo/psalm": "^5.0"
+    },
+    "replace": {
+        "symfony/polyfill-mbstring": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-php74": "*",
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php81": "*"
+    },
+    "autoload": {
+        "files": [
+            "src/Components/env.php"
+        ],
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "app": [
+            "Composer\\Config::disableProcessTimeout",
+            "php bin/app.php --ansi"
+        ],
+        "php-cs-fixer": "php-cs-fixer --config=.php-cs-fixer.php --allow-risky=yes",
+        "lint": "phplint",
+        "psalm": "psalm",
+        "test": "phpunit --colors=always",
+        "test-coverage": "XDEBUG_MODE=coverage phpunit --colors=always --coverage-html var/test/coverage"
+    }
+}

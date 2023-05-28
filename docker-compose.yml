@@ -1,0 +1,87 @@
+version: "3.9"
+services:
+
+    nginx:
+        container_name: hl-messenger-nginx
+        build:
+            context: docker
+            dockerfile: development/nginx/Dockerfile
+        ports:
+            - "8001:80"
+        volumes:
+            - .:/app
+        depends_on:
+            - php-fpm
+        networks:
+            - hl-network-messenger
+
+    php-fpm:
+        container_name: hl-messenger-php-fpm
+        build:
+            context: docker
+            dockerfile: development/php-fpm/Dockerfile
+        environment:
+            APP_ENV: ${APP_ENV}
+            APP_DEBUG: ${APP_DEBUG}
+            PHP_IDE_CONFIG: serverName=API
+            SENTRY_DSN: ${SENTRY_DSN}
+            DB_DRIVER: ${DB_DRIVER}
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_CHARSET: ${DB_CHARSET}
+            JWT_ENCRYPTION_KEY: /run/secrets/jwt_encryption_key
+            JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+            JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private_key
+        volumes:
+            - .:/app
+        secrets:
+            - jwt_encryption_key
+            - jwt_public_key
+            - jwt_private_key
+        networks:
+            - hl-network-messenger
+
+    php-cli:
+        container_name: hl-messenger-php-cli
+        build:
+            context: docker
+            dockerfile: development/php-cli/Dockerfile
+        environment:
+            APP_ENV: ${APP_ENV}
+            APP_DEBUG: ${APP_DEBUG}
+            SENTRY_DSN: ${SENTRY_DSN}
+            DB_DRIVER: ${DB_DRIVER}
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_CHARSET: ${DB_CHARSET}
+        volumes:
+            - .:/app
+        networks:
+            - hl-network-messenger
+
+    mysql:
+        container_name: hl-messenger-mysql
+        image: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${DB_NAME}
+        volumes:
+            - ./var/mysql:/var/lib/mysql
+        networks:
+            - hl-network-messenger
+
+networks:
+    hl-network-messenger:
+        driver: bridge
+
+secrets:
+    jwt_encryption_key:
+        file: ./docker/development/secrets/jwt_encryption_key
+    jwt_public_key:
+        file: ./docker/development/secrets/jwt_public_key
+    jwt_private_key:
+        file: ./docker/development/secrets/jwt_private_key

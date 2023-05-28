@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         cacheResultFile="var/cache/.phpunit.result.cache"
+         verbose="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>src/Http/Test</directory>
+            <directory>src/Components/FeatureToggle/Test</directory>
+            <directory>src/Components/Router/Test</directory>
+            <directory>src/Components/Translator/Test</directory>
+            <directory>src/Components/Validator/Test</directory>
+            <directory>src/Modules/OAuth/Test</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>src/Http/Test</directory>
+            <directory>src/Components/FeatureToggle/Test</directory>
+            <directory>src/Components/Frontend/Test</directory>
+        </exclude>
+    </coverage>
+
+    <php>
+        <env name="APP_ENV" value="test" force="true"/>
+        <env name="APP_DEBUG" value="1" force="true"/>
+    </php>
+</phpunit>

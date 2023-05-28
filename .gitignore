@@ -1,0 +1,30 @@
+.env
+.env.deploy
+.env.staging
+.phplint-cache
+
+# local file
+*.local.php
+
+# temp files dir
+/files/tmp
+
+# composer vendor dir
+/vendor
+
+# Mac DS_Store Files
+.DS_Store
+
+# windows thumbnail cache
+Thumbs.db
+
+# phpstorm project files
+.idea
+
+# netbeans project files
+nbproject
+
+# zend studio for eclipse project files
+.buildpath
+.project
+.settings
