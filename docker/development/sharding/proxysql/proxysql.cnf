@@ -42,13 +42,13 @@ mysql_servers =
     {
         address="hl-mysql-node-1"
         port=3306
-        hostgroup=1
+        hostgroup=10
         max_connections=200
     },
     {
         address="hl-mysql-node-2"
         port=3306
-        hostgroup=2
+        hostgroup=11
         max_connections=200
     }
 )
@@ -78,12 +78,29 @@ mysql_query_rules:
     {
         rule_id=1
         active=1
-        match_digest="INSERT INTO conversation_message \(.*\) VALUES \((\d+),"
-        destination_hostgroup="\1"
+        match_pattern="INSERT INTO conversation_message \(.*\) VALUES \(0"
+        destination_hostgroup=10
         apply=1
-    }
+    },
+    {
+        rule_id=2
+        active=1
+        match_pattern="INSERT INTO conversation_message \(.*\) VALUES \(1"
+        destination_hostgroup=11
+        apply=1
+    },
+    {
+        rule_id=3
+        active=1
+        match_pattern="SELECT m.shard_id, m.id, m.conversation_id, m.user_id, m.created_at, m.text FROM conversation_message m WHERE \(m.shard_id = 0"
+        destination_hostgroup=10
+        apply=1
+    },
+    {
+        rule_id=4
+        active=1
+        match_pattern="SELECT m.shard_id, m.id, m.conversation_id, m.user_id, m.created_at, m.text FROM conversation_message m WHERE \(m.shard_id = 1"
+        destination_hostgroup=11
+        apply=1
+    },
 )
-
-
-# CONVERT(fnv1a_64('$1') % 2 AS UNSIGNED)
-# CAST(fnv1a_64('$1') % 2 AS UNSIGNED)

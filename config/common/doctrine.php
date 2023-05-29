@@ -65,7 +65,7 @@ return [
                 'driver' => env('DB_DRIVER'),
                 'host' => env('DB_HOST'),
                 'user' => env('DB_USER'),
-                'password' => env('DB_ROOT_PASSWORD'),
+                'password' => env('DB_PASSWORD'),
                 'dbname' => env('DB_NAME'),
                 'charset' => env('DB_CHARSET'),
                 'port' => env('DB_PORT'),

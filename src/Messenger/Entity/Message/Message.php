@@ -19,6 +19,9 @@ final class Message
     private ?int $id = null;
 
     #[ORM\Column(type: 'integer')]
+    private int $shardId;
+
+    #[ORM\Column(type: 'integer')]
     private int $conversationId;
 
     #[ORM\Column(type: 'integer')]
@@ -37,10 +40,12 @@ final class Message
     private ?int $deletedAt = null;
 
     private function __construct(
+        int $shardId,
         int $conversationId,
         int $userId,
         string $text,
     ) {
+        $this->shardId        = $shardId;
         $this->conversationId = $conversationId;
         $this->userId         = $userId;
         $this->text           = $text;
@@ -48,11 +53,13 @@ final class Message
     }
 
     public static function create(
+        int $shardId,
         int $conversationId,
         int $userId,
         string $text,
     ): self {
         return new self(
+            shardId: $shardId,
             conversationId: $conversationId,
             userId: $userId,
             text: $text
@@ -78,6 +85,16 @@ final class Message
     public function setId(?int $id): void
     {
         $this->id = $id;
+    }
+
+    public function getShardId(): int
+    {
+        return $this->shardId;
+    }
+
+    public function setShardId(int $shardId): void
+    {
+        $this->shardId = $shardId;
     }
 
     public function getConversationId(): int

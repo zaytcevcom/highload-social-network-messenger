@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Messenger\Query\Message\GetByConversationId;
 
-use App\Components\AllCount;
-use App\Components\ResultCountItems;
+use App\Messenger\Helper\MessageHelper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -13,33 +12,17 @@ final class MessageGetByConversationIdFetcher
 {
     public function __construct(
         private readonly Connection $connection,
+        private readonly MessageHelper $messageHelper,
     ) {
     }
 
     /** @throws Exception */
-    public function fetch(MessageGetByConversationIdQuery $query): ResultCountItems
+    public function fetch(MessageGetByConversationIdQuery $query): array
     {
-        $queryBuilder = $this->connection->createQueryBuilder();
+        $shardId = $this->messageHelper->getShardId($query->conversationId);
 
-        $sqlQuery = $queryBuilder
-            ->select('m.*')
-            ->from('conversation_message', 'm')
-            ->andWhere('m.conversation_id = :conversationId')
-            ->andWhere('m.deleted_at IS NULL')
-            ->setParameter('conversationId', $query->conversationId);
+        $sql = 'SELECT m.shard_id, m.id, m.conversation_id, m.user_id, m.created_at, m.text FROM conversation_message m WHERE (m.shard_id = ' . $shardId . ') AND (m.conversation_id = ' . $query->conversationId . ') AND (m.deleted_at IS NULL) ORDER BY m.created_at DESC, m.id DESC LIMIT ' . $query->count . ' OFFSET ' . $query->offset;
 
-        $result = $sqlQuery
-            ->orderBy('m.created_at', 'DESC')
-            ->addOrderBy('m.id', 'DESC')
-            ->setMaxResults($query->count)
-            ->setFirstResult($query->offset)
-            ->executeQuery();
-
-        $rows = $result->fetchAllAssociative();
-
-        return new ResultCountItems(
-            AllCount::get($sqlQuery),
-            $rows
-        );
+        return $this->connection->executeQuery($sql)->fetchAllAssociative();
     }
 }

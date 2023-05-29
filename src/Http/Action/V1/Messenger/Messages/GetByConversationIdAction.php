@@ -16,7 +16,7 @@ use ZayMedia\Shared\Components\Serializer\Denormalizer;
 use ZayMedia\Shared\Components\Validator\Validator;
 use ZayMedia\Shared\Helpers\OpenApi\ResponseSuccessful;
 use ZayMedia\Shared\Http\Middleware\Identity\Authenticate;
-use ZayMedia\Shared\Http\Response\JsonDataItemsResponse;
+use ZayMedia\Shared\Http\Response\JsonDataResponse;
 
 #[OA\Get(
     path: '/conversations/{id}/messages',
@@ -92,9 +92,8 @@ final class GetByConversationIdAction implements RequestHandlerInterface
 
         $result = $this->fetcher->fetch($query);
 
-        return new JsonDataItemsResponse(
-            count: $result->count,
-            items: $this->unifier->unify($identity->id, $result->items)
+        return new JsonDataResponse(
+            data: $this->unifier->unify($identity->id, $result)
         );
     }
 }

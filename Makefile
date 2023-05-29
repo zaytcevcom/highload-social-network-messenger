@@ -51,15 +51,15 @@ docker-build:
 	docker-compose build --pull
 
 app-clear:
-	docker run --rm -v ${PWD}/:/app -w /app alpine sh -c 'rm -rf var/cache/* var/log/* var/test/* var/mysql/*'
+	docker run --rm -v ${PWD}/:/app -w /app alpine sh -c 'rm -rf var/cache/* var/log/* var/test/*'
 
 #Composer
 app-init: app-permissions app-composer-install \
-	app-wait-mysql \
+	app-wait-db-node-0 app-wait-db-node-1 app-wait-db-node-2 app-wait-proxysql \
 	app-db-migrations app-db-fixtures
 
 app-permissions:
-	docker run --rm -v ${PWD}/:/app -w /app alpine chmod 777 var/cache var/log var/test var/mysql
+	docker run --rm -v ${PWD}/:/app -w /app alpine chmod 777 var/cache var/log var/test
 
 app-composer-install:
 	docker-compose run --rm php-cli composer install
@@ -72,9 +72,6 @@ app-composer-autoload: #refresh autoloader
 
 app-composer-outdated: #get not updated
 	docker-compose run --rm php-cli composer outdated
-
-app-wait-mysql:
-	docker-compose run --rm php-cli wait-for-it mysql:3306 -t 30
 
 app-wait-proxysql:
 	docker-compose run --rm php-cli wait-for-it proxysql:6033 -t 30

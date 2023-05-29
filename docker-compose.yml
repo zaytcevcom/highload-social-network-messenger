@@ -63,24 +63,13 @@ services:
         networks:
             - hl-network-messenger
 
-    mysql:
-        container_name: hl-messenger-mysql
-        image: mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${DB_NAME}
-        volumes:
-            - ./var/mysql:/var/lib/mysql
-        networks:
-            - hl-network-messenger
-
     proxysql:
         container_name: hl-proxysql
         build:
             context: docker
             dockerfile: development/sharding/proxysql/Dockerfile
         volumes:
-            - ./var/sharding/proxysql:/var/lib/mysql
+            - proxysql:/var/lib/mysql
         networks:
             - hl-network-messenger
         ports:
@@ -104,7 +93,7 @@ services:
             MYSQL_USER: ${DB_USER}
             MYSQL_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - ./var/sharding/mysql/node-0:/var/lib/mysql
+            - node-0:/var/lib/mysql
         networks:
             - hl-network-messenger
 
@@ -121,7 +110,7 @@ services:
             MYSQL_USER: ${DB_USER}
             MYSQL_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - ./var/sharding/mysql/node-1:/var/lib/mysql
+            - node-1:/var/lib/mysql
         networks:
             - hl-network-messenger
 
@@ -138,9 +127,26 @@ services:
             MYSQL_USER: ${DB_USER}
             MYSQL_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - ./var/sharding/mysql/node-2:/var/lib/mysql
+            - node-2:/var/lib/mysql
         networks:
             - hl-network-messenger
+
+    phpmyadmin:
+        container_name: hl-messenger-phpmyadmin
+        image: phpmyadmin
+        environment:
+            PMA_ARBITRARY: 1
+            UPLOAD_LIMIT: 500M
+        ports:
+            - "7888:80"
+        networks:
+            - hl-network-messenger
+
+volumes:
+    node-0:
+    node-1:
+    node-2:
+    proxysql:
 
 networks:
     hl-network-messenger:

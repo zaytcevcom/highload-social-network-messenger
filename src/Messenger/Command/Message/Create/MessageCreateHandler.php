@@ -9,6 +9,8 @@ use App\Messenger\Entity\Conversation\ConversationRepository;
 use App\Messenger\Entity\ConversationMember\ConversationMemberRepository;
 use App\Messenger\Entity\Message\Message;
 use App\Messenger\Entity\Message\MessageRepository;
+use App\Messenger\Helper\MessageHelper;
+use Doctrine\DBAL\Connection;
 use ZayMedia\Shared\Components\Flusher;
 use ZayMedia\Shared\Http\Exception\DomainExceptionModule;
 
@@ -20,6 +22,8 @@ final class MessageCreateHandler
         private readonly ConversationRefreshLastMessageIdHandler $conversationRefreshLastMessageIdHandler,
         private readonly MessageRepository $messageRepository,
         private readonly Flusher $flusher,
+        private readonly MessageHelper $messageHelper,
+        private readonly Connection $connection,
     ) {
     }
 
@@ -36,15 +40,23 @@ final class MessageCreateHandler
         }
 
         $message = Message::create(
+            shardId: $this->messageHelper->getShardId($conversation->getId()),
             conversationId: $conversation->getId(),
             userId: $command->userId,
             text: $command->text,
         );
 
-        $this->messageRepository->add($message);
-
-        $this->flusher->flush();
+        $this->nativeQuery($message);
+        //        $this->messageRepository->add($message);
+        //        $this->flusher->flush();
 
         $this->conversationRefreshLastMessageIdHandler->handle($conversation->getId());
+    }
+
+    private function nativeQuery(Message $message): void
+    {
+        $sql = 'INSERT INTO conversation_message (shard_id, conversation_id, user_id, text, created_at, updated_at, deleted_at) VALUES (' . $message->getShardId() . ', ' . $message->getConversationId() . ', ' . $message->getUserId() . ', "' . $message->getText() . '", ' . $message->getCreatedAt() . ', NULL, NULL)';
+
+        $this->connection->executeQuery($sql);
     }
 }
