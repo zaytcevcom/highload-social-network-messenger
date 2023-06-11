@@ -11,6 +11,7 @@ use DomainException;
 #[ORM\Table(name: 'conversation_message')]
 #[ORM\Index(fields: ['conversationId'], name: 'IDX_CONVERSATION')]
 #[ORM\Index(fields: ['userId'], name: 'IDX_USER')]
+#[ORM\Index(fields: ['createdAt'], name: 'IDX_CREATED_AT')]
 final class Message
 {
     #[ORM\Id]

@@ -8,11 +8,12 @@ use App\Messenger\Command\Conversation\RefreshLastMessageId\ConversationRefreshL
 use App\Messenger\Entity\Conversation\ConversationRepository;
 use App\Messenger\Entity\ConversationMember\ConversationMemberRepository;
 use App\Messenger\Entity\Message\Message;
-use App\Messenger\Entity\Message\MessageRepository;
 use App\Messenger\Helper\MessageHelper;
 use Doctrine\DBAL\Connection;
-use ZayMedia\Shared\Components\Flusher;
+use Tarantool\Client\Client;
 use ZayMedia\Shared\Http\Exception\DomainExceptionModule;
+
+use function App\Components\env;
 
 final class MessageCreateHandler
 {
@@ -20,8 +21,7 @@ final class MessageCreateHandler
         private readonly ConversationRepository $conversationRepository,
         private readonly ConversationMemberRepository $conversationMemberRepository,
         private readonly ConversationRefreshLastMessageIdHandler $conversationRefreshLastMessageIdHandler,
-        private readonly MessageRepository $messageRepository,
-        private readonly Flusher $flusher,
+        private readonly Client $tarantool,
         private readonly MessageHelper $messageHelper,
         private readonly Connection $connection,
     ) {
@@ -46,14 +46,27 @@ final class MessageCreateHandler
             text: $command->text,
         );
 
-        $this->nativeQuery($message);
-        //        $this->messageRepository->add($message);
-        //        $this->flusher->flush();
+        if (env('TARANTOOL_ENABLE')) {
+            $this->insertToTarantool($message);
+        } else {
+            $this->insertToMySql($message);
+        }
 
         $this->conversationRefreshLastMessageIdHandler->handle($conversation->getId());
     }
 
-    private function nativeQuery(Message $message): void
+    private function insertToTarantool(Message $message): void
+    {
+        $this->tarantool->call(
+            'conversation_message_insert',
+            $message->getConversationId(),
+            $message->getUserId(),
+            $message->getText(),
+            $message->getCreatedAt()
+        );
+    }
+
+    private function insertToMySql(Message $message): void
     {
         $sql = 'INSERT INTO conversation_message (shard_id, conversation_id, user_id, text, created_at, updated_at, deleted_at) VALUES (' . $message->getShardId() . ', ' . $message->getConversationId() . ', ' . $message->getUserId() . ', "' . $message->getText() . '", ' . $message->getCreatedAt() . ', NULL, NULL)';
 

@@ -23,8 +23,11 @@ services:
         environment:
             APP_ENV: ${APP_ENV}
             APP_DEBUG: ${APP_DEBUG}
-            PHP_IDE_CONFIG: serverName=API
             SENTRY_DSN: ${SENTRY_DSN}
+            TARANTOOL_ENABLE: ${TARANTOOL_ENABLE}
+            TARANTOOL_HOST: ${TARANTOOL_HOST}
+            TARANTOOL_USER: ${TARANTOOL_USER}
+            TARANTOOL_PASSWORD: ${TARANTOOL_PASSWORD}
             DB_DRIVER: ${DB_DRIVER}
             DB_HOST: ${DB_HOST}
             DB_USER: ${DB_USER}
@@ -52,6 +55,10 @@ services:
             APP_ENV: ${APP_ENV}
             APP_DEBUG: ${APP_DEBUG}
             SENTRY_DSN: ${SENTRY_DSN}
+            TARANTOOL_ENABLE: ${TARANTOOL_ENABLE}
+            TARANTOOL_HOST: ${TARANTOOL_HOST}
+            TARANTOOL_USER: ${TARANTOOL_USER}
+            TARANTOOL_PASSWORD: ${TARANTOOL_PASSWORD}
             DB_DRIVER: ${DB_DRIVER}
             DB_HOST: ${DB_HOST}
             DB_USER: ${DB_USER}
@@ -139,6 +146,19 @@ services:
             UPLOAD_LIMIT: 500M
         ports:
             - "7888:80"
+        networks:
+            - hl-network-messenger
+
+    tarantool:
+        container_name: hl-tarantool
+        restart: always
+        build:
+            context: docker
+            dockerfile: development/tarantool/Dockerfile
+        ports:
+            - "3301:3301"
+        volumes:
+            - ./var/tarantool:/var/lib/tarantool
         networks:
             - hl-network-messenger
 

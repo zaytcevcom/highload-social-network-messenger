@@ -42,6 +42,7 @@
         "symfony/serializer": "^6.2",
         "symfony/translation": "^6.1",
         "symfony/validator": "^6.1",
+        "tarantool/client": "^0.10.0",
         "twig/twig": "^3.4",
         "vlucas/phpdotenv": "^5.4",
         "zaymedia/shared": "^1.0",

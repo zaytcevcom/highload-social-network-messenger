@@ -6,18 +6,49 @@ namespace App\Messenger\Query\Message\GetByConversationId;
 
 use App\Messenger\Helper\MessageHelper;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
+use Tarantool\Client\Client;
+
+use function App\Components\env;
 
 final class MessageGetByConversationIdFetcher
 {
     public function __construct(
         private readonly Connection $connection,
         private readonly MessageHelper $messageHelper,
+        private readonly Client $tarantool,
     ) {
     }
 
-    /** @throws Exception */
     public function fetch(MessageGetByConversationIdQuery $query): array
+    {
+        if (env('TARANTOOL_ENABLE')) {
+            return $this->selectFromTarantool($query);
+        }
+
+        return $this->selectFromMySql($query);
+    }
+
+    private function selectFromTarantool(MessageGetByConversationIdQuery $query): array
+    {
+        $rows = $this->tarantool->call('conversation_messages_select', $query->conversationId, $query->count, $query->offset);
+
+        $result = [];
+
+        /** @var string[] $row */
+        foreach ($rows[0] as $row) {
+            $result[] = [
+                'id'                => $row[0] ?? null,
+                'conversation_id'   => $row[1] ?? null,
+                'user_id'           => $row[2] ?? null,
+                'text'              => $row[3] ?? null,
+                'created_at'        => $row[4] ?? null,
+            ];
+        }
+
+        return $result;
+    }
+
+    private function selectFromMySql(MessageGetByConversationIdQuery $query): array
     {
         $shardId = $this->messageHelper->getShardId($query->conversationId);
 
