@@ -15,6 +15,7 @@ use ZayMedia\Shared\Components\Router\Route;
 use ZayMedia\Shared\Components\Serializer\Denormalizer;
 use ZayMedia\Shared\Components\Validator\Validator;
 use ZayMedia\Shared\Helpers\OpenApi\ResponseSuccessful;
+use ZayMedia\Shared\Helpers\OpenApi\Security;
 use ZayMedia\Shared\Http\Middleware\Identity\Authenticate;
 use ZayMedia\Shared\Http\Response\JsonDataResponse;
 
@@ -22,7 +23,7 @@ use ZayMedia\Shared\Http\Response\JsonDataResponse;
     path: '/conversations/{id}/messages',
     description: 'Получение списка сообщений беседы',
     summary: 'Получение списка сообщений беседы',
-    security: [['bearerAuth' => '{}']],
+    security: [Security::BEARER_AUTH],
     tags: ['Messenger'],
     responses: [new ResponseSuccessful()]
 )]

@@ -11,6 +11,7 @@ use App\Messenger\Entity\Message\Message;
 use App\Messenger\Helper\MessageHelper;
 use Doctrine\DBAL\Connection;
 use Tarantool\Client\Client;
+use ZayMedia\Shared\Components\Queue\Queue;
 use ZayMedia\Shared\Http\Exception\DomainExceptionModule;
 
 use function App\Components\env;
@@ -24,6 +25,7 @@ final class MessageCreateHandler
         private readonly Client $tarantool,
         private readonly MessageHelper $messageHelper,
         private readonly Connection $connection,
+        private readonly Queue $queue,
     ) {
     }
 
@@ -47,29 +49,49 @@ final class MessageCreateHandler
         );
 
         if (env('TARANTOOL_ENABLE')) {
-            $this->insertToTarantool($message);
+            $messageId = $this->insertToTarantool($message);
         } else {
-            $this->insertToMySql($message);
+            $messageId = $this->insertToMySql($message);
         }
+
+        $this->sendEventNewMessage(
+            conversationId: $conversation->getId(),
+            messageId: $messageId,
+            userId: $command->userId
+        );
 
         $this->conversationRefreshLastMessageIdHandler->handle($conversation->getId());
     }
 
-    private function insertToTarantool(Message $message): void
+    private function insertToTarantool(Message $message): int
     {
-        $this->tarantool->call(
+        return (int)$this->tarantool->call(
             'conversation_message_insert',
             $message->getConversationId(),
             $message->getUserId(),
             $message->getText(),
             $message->getCreatedAt()
-        );
+        )[0];
     }
 
-    private function insertToMySql(Message $message): void
+    private function insertToMySql(Message $message): int
     {
         $sql = 'INSERT INTO conversation_message (shard_id, conversation_id, user_id, text, created_at, updated_at, deleted_at) VALUES (' . $message->getShardId() . ', ' . $message->getConversationId() . ', ' . $message->getUserId() . ', "' . $message->getText() . '", ' . $message->getCreatedAt() . ', NULL, NULL)';
 
         $this->connection->executeQuery($sql);
+
+        return (int)$this->connection->lastInsertId();
+    }
+
+    private function sendEventNewMessage(int $conversationId, int $messageId, int $userId): void
+    {
+        $this->queue->publish(
+            queue: 'new-message',
+            message: [
+                'conversationId'    => $conversationId,
+                'messageId'         => $messageId,
+                'userId'            => $userId,
+            ]
+        );
     }
 }

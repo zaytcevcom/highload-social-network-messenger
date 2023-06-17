@@ -16,6 +16,7 @@ return static function (App $app): void {
             $group->post('/dialog/{userId}', Action\V1\Messenger\Conversations\CreateAction::class);
             $group->get('/{id}/messages', Action\V1\Messenger\Messages\GetByConversationIdAction::class);
             $group->post('/{id}/messages', Action\V1\Messenger\Messages\CreateAction::class);
+            $group->post('/{id}/messages/{messageId}/read', Action\V1\Messenger\Messages\ReadAction::class);
         }));
     }));
 };

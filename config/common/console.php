@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Messenger\Console\ConsumerNewMessage;
 use App\Messenger\Console\GenerateMessagesCommand;
 use Doctrine\Migrations;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,6 +29,7 @@ return [
                 Migrations\Tools\Console\Command\UpToDateCommand::class,
 
                 GenerateMessagesCommand::class,
+                ConsumerNewMessage::class,
             ],
         ],
     ],

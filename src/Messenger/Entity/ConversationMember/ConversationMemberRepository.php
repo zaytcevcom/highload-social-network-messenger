@@ -33,9 +33,30 @@ final class ConversationMemberRepository
         return $conversationMember;
     }
 
+    public function getByConversationAndUserIds(int $conversationId, int $userId): ConversationMember
+    {
+        if (!$conversationMember = $this->findByConversationAndUserIds($conversationId, $userId)) {
+            throw new DomainExceptionModule(
+                module: 'messenger',
+                message: 'error.messenger.conversation_member_not_found',
+                code: 1
+            );
+        }
+
+        return $conversationMember;
+    }
+
+    public function findByConversationAndUserIds(int $conversationId, int $userId): ?ConversationMember
+    {
+        return $this->repo->findOneBy([
+            'conversationId' => $conversationId,
+            'userId' => $userId,
+        ]);
+    }
+
     public function isMember(int $conversationId, int $userId): bool
     {
-        return $this->repo->findOneBy(['conversationId' => $conversationId, 'userId' => $userId]) !== null;
+        return $this->findByConversationAndUserIds($conversationId, $userId) !== null;
     }
 
     public function findById(int $id): ?ConversationMember

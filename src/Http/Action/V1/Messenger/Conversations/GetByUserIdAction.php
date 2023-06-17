@@ -14,6 +14,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use ZayMedia\Shared\Components\Serializer\Denormalizer;
 use ZayMedia\Shared\Components\Validator\Validator;
 use ZayMedia\Shared\Helpers\OpenApi\ResponseSuccessful;
+use ZayMedia\Shared\Helpers\OpenApi\Security;
 use ZayMedia\Shared\Http\Middleware\Identity\Authenticate;
 use ZayMedia\Shared\Http\Response\JsonDataItemsResponse;
 
@@ -21,7 +22,7 @@ use ZayMedia\Shared\Http\Response\JsonDataItemsResponse;
     path: '/conversations',
     description: 'Получение списка бесед пользователя',
     summary: 'Получение списка бесед пользователя',
-    security: [['bearerAuth' => '{}']],
+    security: [Security::BEARER_AUTH],
     tags: ['Messenger'],
     responses: [new ResponseSuccessful()]
 )]
@@ -93,6 +94,7 @@ final class GetByUserIdAction implements RequestHandlerInterface
 
         $result = $this->fetcher->fetch($query);
 
+        $this->unifier->setAccessToken(Authenticate::getAccessToken($request));
         $items = $this->unifier->unify($identity->id, $result->items);
 
         return new JsonDataItemsResponse(

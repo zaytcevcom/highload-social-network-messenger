@@ -4,38 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Action\V1\Messenger\Messages;
 
-use App\Messenger\Command\Message\Create\MessageCreateCommand;
-use App\Messenger\Command\Message\Create\MessageCreateHandler;
+use App\Messenger\Command\Message\Read\MessageReadCommand;
+use App\Messenger\Command\Message\Read\MessageReadHandler;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ZayMedia\Shared\Components\Router\Route;
-use ZayMedia\Shared\Components\Serializer\Denormalizer;
 use ZayMedia\Shared\Components\Validator\Validator;
 use ZayMedia\Shared\Helpers\OpenApi\Security;
 use ZayMedia\Shared\Http\Middleware\Identity\Authenticate;
 use ZayMedia\Shared\Http\Response\JsonDataSuccessResponse;
 
 #[OA\Post(
-    path: '/conversations/{id}/messages',
-    description: 'Отправка сообщения<br><br>
-    **Коды ошибок**:<br>
-    **1** - Доступ запрещен<br>',
-    summary: 'Отправка сообщения',
+    path: '/conversations/{id}/messages/{messageId}/read',
+    description: 'Пометить сообщение как прочитанное',
+    summary: 'Пометить сообщение как прочитанное',
     security: [Security::BEARER_AUTH],
-    requestBody: new OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'text',
-                    type: 'string',
-                    example: 'Новое сообщение!'
-                ),
-            ]
-        )
-    ),
     tags: ['Messenger']
 )]
 #[OA\Parameter(
@@ -49,15 +34,25 @@ use ZayMedia\Shared\Http\Response\JsonDataSuccessResponse;
     ),
     example: 1
 )]
+#[OA\Parameter(
+    name: 'messageId',
+    description: 'Идентификатор сообщения',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(
+        type: 'integer',
+        format: 'int64'
+    ),
+    example: 1
+)]
 #[OA\Response(
     response: '200',
     description: 'Successful operation'
 )]
-final class CreateAction implements RequestHandlerInterface
+final class ReadAction implements RequestHandlerInterface
 {
     public function __construct(
-        private readonly Denormalizer $denormalizer,
-        private readonly MessageCreateHandler $handler,
+        private readonly MessageReadHandler $handler,
         private readonly Validator $validator,
     ) {
     }
@@ -66,12 +61,10 @@ final class CreateAction implements RequestHandlerInterface
     {
         $identity = Authenticate::getIdentity($request);
 
-        $command = $this->denormalizer->denormalize(
-            array_merge((array)$request->getParsedBody(), [
-                'userId'            => $identity->id,
-                'conversationId'    => Route::getArgumentToInt($request, 'id'),
-            ]),
-            MessageCreateCommand::class
+        $command = new MessageReadCommand(
+            userId: $identity->id,
+            conversationId: Route::getArgumentToInt($request, 'id'),
+            messageId: Route::getArgumentToInt($request, 'messageId'),
         );
 
         $this->validator->validate($command);

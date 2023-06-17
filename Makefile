@@ -1,17 +1,3 @@
-pull: pull-git pull-composer pull-migrate pull-clear
-
-pull-git:
-	git pull
-
-pull-composer:
-	/www/server/php/81/bin/php composer.phar install --no-interaction
-
-pull-migrate:
-	/www/server/php/81/bin/php composer.phar app-server migrations:migrate
-
-pull-clear:
-	rm -rf var/cache/* var/log/*
-
 init: init-ci
 init-ci: docker-down-clear \
 	app-clear \

@@ -28,6 +28,10 @@ services:
             TARANTOOL_HOST: ${TARANTOOL_HOST}
             TARANTOOL_USER: ${TARANTOOL_USER}
             TARANTOOL_PASSWORD: ${TARANTOOL_PASSWORD}
+            RABBITMQ_HOST: ${RABBITMQ_HOST}
+            RABBITMQ_PORT: ${RABBITMQ_PORT}
+            RABBITMQ_USER: ${RABBITMQ_USER}
+            RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
             DB_DRIVER: ${DB_DRIVER}
             DB_HOST: ${DB_HOST}
             DB_USER: ${DB_USER}
@@ -59,6 +63,10 @@ services:
             TARANTOOL_HOST: ${TARANTOOL_HOST}
             TARANTOOL_USER: ${TARANTOOL_USER}
             TARANTOOL_PASSWORD: ${TARANTOOL_PASSWORD}
+            RABBITMQ_HOST: ${RABBITMQ_HOST}
+            RABBITMQ_PORT: ${RABBITMQ_PORT}
+            RABBITMQ_USER: ${RABBITMQ_USER}
+            RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
             DB_DRIVER: ${DB_DRIVER}
             DB_HOST: ${DB_HOST}
             DB_USER: ${DB_USER}
@@ -150,7 +158,7 @@ services:
             - hl-network-messenger
 
     tarantool:
-        container_name: hl-tarantool
+        container_name: hl-messenger-tarantool
         restart: always
         build:
             context: docker
@@ -161,6 +169,30 @@ services:
             - ./var/tarantool:/var/lib/tarantool
         networks:
             - hl-network-messenger
+
+    php-event-new-message:
+        container_name: hl-messenger-event-new-message
+        restart: always
+        build:
+            context: docker
+            dockerfile: development/php-cli/Dockerfile
+        environment:
+            APP_ENV: ${APP_ENV}
+            APP_DEBUG: ${APP_DEBUG}
+            SENTRY_DSN: ${SENTRY_DSN}
+            DB_DRIVER: ${DB_DRIVER}
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_NAME: ${DB_NAME}
+            DB_CHARSET: ${DB_CHARSET}
+        volumes:
+            - .:/app
+        networks:
+            - hl-network-messenger
+        depends_on:
+            - proxysql
+        command: composer app messenger:consumer-new-message
 
 volumes:
     node-0:

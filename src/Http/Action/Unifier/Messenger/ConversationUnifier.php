@@ -11,16 +11,27 @@ use App\Messenger\Query\Message\GetByIds\MessageGetByIdsFetcher;
 use App\Messenger\Query\Message\GetByIds\MessageGetByIdsQuery;
 use App\Messenger\Service\ConversationSerializer;
 use App\Messenger\Service\MessageSerializer;
+use ZayMedia\Shared\Components\RestServiceClient;
 use ZayMedia\Shared\Http\Unifier\UnifierInterface;
+
+use function App\Components\env;
 
 final class ConversationUnifier implements UnifierInterface
 {
+    private ?string $accessToken = null;
+
     public function __construct(
         private readonly ConversationSerializer $conversationSerializer,
         private readonly MessageSerializer $messageSerializer,
         private readonly MessageGetByIdsFetcher $messageGetByIdsFetcher,
         private readonly ConversationGetInterlocutorsFetcher $conversationGetInterlocutorsFetcher,
+        private readonly RestServiceClient $restServiceClient,
     ) {
+    }
+
+    public function setAccessToken(string $accessToken): void
+    {
+        $this->accessToken = $accessToken;
     }
 
     public function unifyOne(?int $userId, ?array $item): array
@@ -41,7 +52,9 @@ final class ConversationUnifier implements UnifierInterface
             $items = $this->mapInterlocutors($items, $interlocutors);
         }
 
-        return $this->mapMessages($items, $this->getMessages($entityIds['messageIds']));
+        $items = $this->mapMessages($items, $this->getMessages($entityIds['messageIds']));
+
+        return $this->mapCounters($items);
     }
 
     private function getInterlocutors(int $userId, array $ids): array
@@ -111,6 +124,39 @@ final class ConversationUnifier implements UnifierInterface
 
             if (isset($items[$key]['lastMessageId'])) {
                 unset($items[$key]['lastMessageId']);
+            }
+        }
+
+        return $items;
+    }
+
+    private function mapCounters(array $items): array
+    {
+        $ids = [];
+
+        /** @var array{id: int}[] $items */
+        foreach ($items as $item) {
+            $ids[] = $item['id'];
+        }
+
+        $response = $this->restServiceClient->get(
+            url: env('SERVICE_MESSENGER_COUNTERS_URL') . '/v1/counters',
+            query: [
+                'ids' => $ids,
+            ],
+            accessToken: (string)$this->accessToken
+        );
+
+        foreach ($items as $k => $item) {
+            $items[$k]['countUnread'] = 0;
+
+            if (isset($response['data'])) {
+                /** @var array{id: int, value: int} $counter */
+                foreach ($response['data'] as $counter) {
+                    if ($item['id'] === $counter['id']) {
+                        $items[$k]['countUnread'] = $counter['value'];
+                    }
+                }
             }
         }
 
