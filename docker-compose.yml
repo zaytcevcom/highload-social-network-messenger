@@ -3,6 +3,7 @@ services:
 
     nginx:
         container_name: hl-messenger-nginx
+        restart: always
         build:
             context: docker
             dockerfile: development/nginx/Dockerfile
@@ -193,6 +194,20 @@ services:
         depends_on:
             - proxysql
         command: composer app messenger:consumer-new-message
+
+    zabbix-agent:
+        container_name: hl-messenger-zabbix-agent
+        build:
+            context: docker
+            dockerfile: development/zabbix-agent/Dockerfile
+        ports:
+            - "10050:10050"
+        environment:
+            ZBX_HOSTNAME: "agent"
+            ZBX_SERVER_HOST: "192.168.1.196"
+            ZBX_SERVER_PORT: "10051"
+        networks:
+            - hl-network-messenger
 
 volumes:
     node-0:
